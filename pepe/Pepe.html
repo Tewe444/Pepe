@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Master Quiz v1.9 - Happy Bday PEPE</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Press Start 2P & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        mc: {
+                            dirt: '#5c3d24',
+                            grass: '#59922b',
+                            stone: '#383838',
+                            bedrock: '#1a1a1a',
+                            diamond: '#4bede6',
+                            emerald: '#55ff55',
+                            gold: '#fca800',
+                            redstone: '#ff2200',
+                            obsidian: '#120c1f',
+                            card: '#24242d',
+                            cardBorder: '#3f3f4e'
+                        }
+                    },
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', 'cursive'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f0f14;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(85, 255, 85, 0.08) 0%, transparent 70%),
+                radial-gradient(circle at 80% 80%, rgba(75, 237, 230, 0.05) 0%, transparent 50%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .pixel-font {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .mc-btn {
+            position: relative;
+            box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.4), inset 4px 4px 0px 0px rgba(255,255,255,0.2);
+            transition: all 0.1s ease-in-out;
+        }
+
+        .mc-btn:active {
+            box-shadow: inset 4px 4px 0px 0px rgba(0,0,0,0.6), inset -2px -2px 0px 0px rgba(255,255,255,0.1);
+            transform: translateY(2px);
+        }
+
+        .mc-card {
+            background: rgba(30, 30, 40, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid #3a3a4c;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .timer-bar {
+            transition: width 1s linear, background-color 0.5s ease;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #181820;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f52;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #55ff55;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 overflow-x-hidden antialiased">
+
+    <header class="w-full bg-slate-900/90 border-b border-slate-800 backdrop-blur sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            
+            <div onclick="resetAndRestart()" class="flex items-center gap-3 cursor-pointer group" title="Klicken, um zum Startbildschirm zurückzukehren">
+                <div class="w-10 h-10 rounded-lg bg-mc-grass flex items-center justify-center text-white shadow-md border border-green-400 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid font-bold text-xl fa-cube"></i>
+                </div>
+                <div>
+                    <h1 class="pixel-font text-xs sm:text-sm text-mc-emerald tracking-wider uppercase group-hover:text-green-300 transition-colors">Minecraft Quiz</h1>
+                    <p id="bdayHeader" class="bday-element hidden text-xs text-mc-gold font-bold flex items-center gap-1.5 animate-pulse">
+                        <span>🎉 Happy Birthday PEPE 🎂</span>
+                    </p>
+                </div>
+            </div>
+
+            <button onclick="resetAndRestart()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center gap-2 transition hover:border-mc-emerald">
+                <i class="fa-solid fa-house text-mc-emerald"></i>
+                <span>Zum Start</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8 relative">
+        <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+        <div class="w-full max-w-4xl mx-auto">
+
+            <!-- START SCREEN -->
+            <div id="startScreen" class="mc-card rounded-2xl p-6 sm:p-10 text-center relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-40 h-40 bg-mc-emerald/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div id="bdayBadge" class="bday-element hidden inline-flex items-center gap-2 px-4 py-2 bg-mc-gold/20 border border-mc-gold text-mc-gold rounded-full text-xs sm:text-sm font-bold mb-6 animate-bounce">
+                    <i class="fa-solid fa-cake-candles"></i>
+                    <span>🎉 Happy Birthday PEPE 🎂</span>
+                </div>
+
+                <h2 class="pixel-font text-xl sm:text-2xl md:text-3xl text-white mb-4 leading-tight">
+                    Das Ultimative <span class="text-mc-emerald">Minecraft</span> Quiz
+                </h2>
+                
+                <p class="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
+                    Testet euer Wissen mit englischen Minecraft Item- & Mob-Namen.
+                    Für jede Frage habt ihr exakt <strong class="text-mc-gold font-semibold">15 Sekunden</strong> Zeit zu antworten!
+                </p>
+
+                <div class="bg-slate-800/60 p-5 rounded-xl border border-slate-700/80 max-w-xl mx-auto mb-8 text-left">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                        <i class="fa-solid fa-layer-group text-mc-emerald mr-1.5"></i> Anzahl der Fragen wählen:
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" onclick="selectQuestionCount(10)" class="count-btn py-2 px-3 rounded-lg border text-xs sm:text-sm font-semibold transition bg-slate-700 border-slate-600 text-slate-200 hover:border-mc-emerald" data-count="10">10 Fragen</button>
+                        <button type="button" onclick="selectQuestionCount(25)" class="count-btn py-2 px-3 rounded-lg border text-xs sm:text-sm font-semibold transition bg-slate-700 border-slate-600 text-slate-200 hover:border-mc-emerald" data-count="25">25 Fragen</button>
+                        <button type="button" onclick="selectQuestionCount(50)" class="count-btn py-2 px-3 rounded-lg border text-xs sm:text-sm font-semibold transition bg-slate-700 border-slate-600 text-slate-200 hover:border-mc-emerald" data-count="50">50 Fragen</button>
+                        <button type="button" onclick="selectQuestionCount(100)" class="count-btn py-2 px-3 rounded-lg border text-xs sm:text-sm font-semibold transition bg-mc-emerald/20 border-mc-emerald text-mc-emerald font-bold" data-count="100">Alle (~100)</button>
+                    </div>
+                </div>
+
+                <button onclick="startQuiz()" class="mc-btn w-full sm:w-auto px-10 py-4 bg-mc-grass hover:bg-green-600 text-white rounded-xl font-bold pixel-font text-sm sm:text-base border-2 border-green-400 shadow-lg tracking-wider transform transition hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-play mr-2"></i> QUIZ STARTEN
+                </button>
+            </div>
+
+            <div id="quizScreen" class="hidden mc-card rounded-2xl overflow-hidden relative">
+                <div class="bg-slate-900 px-6 py-4 border-b border-slate-800 flex flex-col gap-3">
+                    <div class="flex items-center justify-between text-xs sm:text-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 bg-mc-emerald/10 text-mc-emerald border border-mc-emerald/30 rounded-lg font-bold pixel-font text-xs" id="questionCounter">
+                                Frage 1 / 100
+                            </span>
+                            <span id="categoryBadge" class="hidden sm:inline-block px-2.5 py-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-medium">
+                                General
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-slate-400">Punkte: <strong id="liveScore" class="text-mc-gold font-bold text-base">0</strong></span>
+                            <div class="flex items-center gap-1.5 bg-slate-800 px-3 py-1 rounded-lg border border-slate-700 font-mono font-bold text-sm" id="timerBox">
+                                <i class="fa-regular fa-clock text-mc-gold"></i>
+                                <span id="timerText" class="text-white">15s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                        <div id="timerBar" class="timer-bar h-full bg-mc-emerald rounded-full w-full"></div>
+                    </div>
+                </div>
+
+                <div class="p-6 sm:p-8">
+                    <h3 id="questionText" class="text-lg sm:text-xl md:text-2xl font-bold text-white mb-6 leading-snug">
+                        Frage wird geladen...
+                    </h3>
+
+                    <div id="optionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-8">
+                    </div>
+
+                    <div class="flex items-center justify-end pt-4 border-t border-slate-800/80">
+                        <button id="nextBtn" onclick="manualNextQuestion()" disabled class="mc-btn px-6 py-2.5 bg-slate-700 opacity-50 cursor-not-allowed text-white rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 border border-slate-600 transition">
+                            <span>Nächste Frage</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resultsScreen" class="hidden mc-card rounded-2xl p-6 sm:p-8">
+                <div class="text-center pb-8 border-b border-slate-800">
+                    <div id="resultBadgeIcon" class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-mc-emerald/20 border-2 border-mc-emerald flex items-center justify-center text-mc-emerald text-4xl shadow-lg"></div>
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+
+                    <h2 class="pixel-font text-xl sm:text-2xl text-white mb-2">Quiz Abgeschlossen!</h2>
+                    <p id="resultRankTitle" class="text-mc-gold font-bold text-lg mb-4">Minecraft Legend</p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto my-6">
+                        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center">
+                            <span class="block text-xs text-slate-400 font-medium mb-1">Punkte</span>
+                            <span id="finalScore" class="text-xl font-bold text-mc-emerald">0 / 100</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center">
+                            <span class="block text-xs text-slate-400 font-medium mb-1">Prozent</span>
+                            <span id="finalPercent" class="text-xl font-bold text-mc-gold">0%</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center">
+                            <span class="block text-xs text-slate-400 font-medium mb-1">Richtig</span>
+                            <span id="finalCorrect" class="text-xl font-bold text-green-400">0</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center">
+                            <span class="block text-xs text-slate-400 font-medium mb-1">Falsch / Abgelaufen</span>
+                            <span id="finalWrong" class="text-xl font-bold text-red-400">0</span>
+                        </div>
+                    </div>
+
+                    <button onclick="resetAndRestart()" class="mc-btn px-8 py-3.5 bg-mc-grass hover:bg-green-600 text-white rounded-xl font-bold pixel-font text-xs sm:text-sm border-2 border-green-400 shadow-lg tracking-wider transition">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> NEUES QUIZ STARTEN
+                    </button>
+                </div>
+
+                <div class="pt-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-mc-emerald"></i>
+                                Auswertung aller Aufgaben & Antworten
+                            </h3>
+                            <p class="text-xs text-slate-400">Übersicht aller Fragen mit englischen Items</p>
+                        </div>
+
+                        <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800 self-start sm:self-auto">
+                            <button onclick="filterResults('all')" id="filterBtnAll" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700 text-white transition">Alle</button>
+                            <button onclick="filterResults('correct')" id="filterBtnCorrect" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">Richtig</button>
+                            <button onclick="filterResults('wrong')" id="filterBtnWrong" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">Falsch</button>
+                            <button onclick="filterResults('timeout')" id="filterBtnTimeout" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">Abgelaufen</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-sm"></i>
+                        <input type="text" id="reviewSearchInput" onkeyup="searchReviewQuestions()" placeholder="Frage oder Item suchen..." class="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-mc-emerald transition">
+                    </div>
+
+                    <div id="resultsList" class="space-y-3.5 max-h-[500px] overflow-y-auto pr-2">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <audio id="quizAudio" preload="auto"></audio>
+
+    <script>
+        const ALL_QUESTIONS = [
+            {
+                q: "Woraus wird ein Eye of Ender hergestellt?",
+                options: ["Ender Pearl + Blaze Powder", "Ender Pearl + Redstone Dust", "Ender Pearl + Diamond", "Blaze Rod + Emerald"],
+                correct: 0,
+                cat: "Crafting & Items"
+            },
+            {
+                q: "Welch Materialen braucht man für eine enderchest",
+                options: ["9 obi und ein Eye of ender", "8 obi und ein Eye of ender", "7 obi und eine blaze rod und eine breeze rod", "8 obi und eine chest"],
+                correct: 1,
+                cat: "Crafting & Items"
+            },
+            {
+                q: "Welches Werkzeug wird mindestens benötigt das Obsidian dropt",
+                options: ["Iron Pickaxe", "Gold Pickaxe", "Diamond Pickaxe", "Stone Pickaxe"],
+                correct: 2,
+                cat: "Tools"
+            },
+            {
+                q: "Welcher Mob greift den Spieler an, sobald man ihm direkt in die Augen sieht?",
+                options: ["Creeper", "Enderman", "Wither Skeleton", "Phantom"],
+                correct: 1,
+                cat: "Mobs"
+            },
+            {
+                q: "Aus welchen Blöcken baut man einen Iron Golem auf?",
+                options: ["4 Iron Blocks + 1 Carved Pumpkin", "3 Iron Blocks + 1 Pumpkin", "4 Gold Blocks + 1 Pumpkin", "4 Obsidian + 1 Pumpkin"],
+                correct: 0,
+                cat: "Spawning"
+            },
+            {
+                q: "Wie heißt die Endboss id in der Dimension 'The End'?",
+                options: ["endboss", "Ender Dragon", "Ender_Dragon", "Dragon:ender"],
+                correct: 2,
+                cat: "Dimensions"
+            },
+            {
+                q: "Welches Futter verwendet man, um einen Wolf zu zähmen?",
+                options: ["Raw Cod", "Bone", "Wheat", "Raw Beef"],
+                correct: 1,
+                cat: "Animals"
+            },
+            {
+                q: "Wie viele Blöcke in der Overworld entspricht 1 Block Fortbewegung im Nether?",
+                options: ["3 Blocks", "5 Blocks", "8 Blocks", "10 Blocks"],
+                correct: 2,
+                cat: "Nether"
+            },
+            {
+                q: "Welches Item schützt den Spieler vor dem sicheren Tod, wenn es gehalten wird?",
+                options: ["Totem of Undying", "Eye of Ender", "Golden Apple", "Nether Star"],
+                correct: 0,
+                cat: "Items"
+            },
+            {
+                q: "Welches Ore findet man am seltensten und ausschließlich in Mountain Biomes?",
+                options: ["Diamond Ore", "Emerald Ore", "La peace Lazuli Ore", "Gold Ore"],
+                correct: 1,
+                cat: "Ores"
+            },
+            {
+                q: "Aus welchem Material wird ein Netherite Ingot hergestellt?",
+                options: ["Netherite Scrap + Gold Ingot", "Nether Quartz + Iron Ingot", "Obsidian + Diamond", "Blaze Powder + Emerald"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Welcher Potion verleiht die Fähigkeit, unter Wasser zu atmen?",
+                options: ["Potion of Night Vision", "Potion of Water Breathing", "Potion of Slow Falling", "Potion of Luck"],
+                correct: 1,
+                cat: "Potions"
+            },
+            {
+                q: "Welches Item droppt ein Phantom nach seinem Tod?",
+                options: ["Phantom Membrane", "Bat Wing", "Ender Scale", "Bone Meal"],
+                correct: 0,
+                cat: "Drops"
+            },
+            {
+                q: "Wie viele Obsidian Blocks benötigt man mindestens für ein Nether Portal (ohne Ecken)?",
+                options: ["8", "10", "12", "14"],
+                correct: 1,
+                cat: "Nether"
+            },
+            {
+                q: "Welches Item dient im Brewing Stand als Treibstoff?",
+                options: ["Redstone Dust", "Blaze Powder", "Glowstone Dust", "Gunpowder"],
+                correct: 1,
+                cat: "Brewing"
+            },
+            {
+                q: "Was passiert mit einem Pig, wenn es von einem Lightning Bolt getroffen wird?",
+                options: ["Es stirbt sofort", "Es wird zum Charged Pig", "Es wird zu einem Zombified Piglin", "Es verdoppelt sich"],
+                correct: 2,
+                cat: "Mechanics"
+            },
+            {
+                q: "Welches Tier lässt Wool fallen und kann mit Wheat gezüchtet werden?",
+                options: ["Cow", "Sheep", "Llama", "Goat(Tewe)"],
+                correct: 1,
+                cat: "Animals"
+            },
+            {
+                q: "Wie stellt man ein Shield her?",
+                options: ["6 Wooden Planks + 1 Iron Ingot", "4 Planks + 2 Sticks", "6 Iron Ingots + 1 Stick", "5 Planks + 1 Leather"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Welcher Mob spuckt Fireballs?",
+                options: ["Blaze", "Ghast", "Magma Cube", "Piglin"],
+                correct: 1,
+                cat: "Nether"
+            },
+            {
+                q: "Aus wie vielen Cobblestone craftet man einen Furnace?",
+                options: ["6", "8", "9", "4"],
+                correct: 1,
+                cat: "Crafting"
+            },
+            {
+                q: "Welche Pflanze wächst im Nether ausschließlich auf Soul Sand?",
+                options: ["Nether Wart", "Red Mushroom", "Vines", "Chorus Fruit"],
+                correct: 0,
+                cat: "Nether"
+            },
+            {
+                q: "Wie baut man einen Snow Golem?",
+                options: ["2 Snow Blocks + 1 Carved Pumpkin", "3 Snow Blocks + 1 Pumpkin", "2 Ice Blocks + 1 Carrot", "4 Snowballs + 1 Pumpkin"],
+                correct: 0,
+                cat: "Spawning"
+            },
+            {
+                q: "Welches Werkzeug benötigt man, um Cobweb am schnellsten abzubauen?",
+                options: ["Axe", "Shears", "Shovel", "Hoe"],
+                correct: 1,
+                cat: "Tools"
+            },
+            {
+                q: "Welcher Mob brennt NICHT am hellichten Tag im Sonnenlicht?",
+                options: ["Zombie", "Skeleton", "Creeper", "Phantom"],
+                correct: 2,
+                cat: "Mobs"
+            },
+            {
+                q: "Was passiert, wenn ein Creeper vom Blitz getroffen wird?",
+                options: ["Er explodiert sofort", "Er wird zu einem Charged Creeper", "Er wird zu einem Skeleton", "Er teilt sich"],
+                correct: 1,
+                cat: "Mechanics"
+            },
+            {
+                q: "Welche Farbe hat Lap peace Lazuli Ore?",
+                options: ["Grün", "Rot", "Blau", "Violett"],
+                correct: 2,
+                cat: "Ores"
+            },
+            {
+                q: "Wie heißt das Item, mit dem der Spieler durch die Lüfte gleiten kann?",
+                options: ["Dragon Wings", "Elytra", "Glider", "Phantom Cape"],
+                correct: 1,
+                cat: "Items"
+            },
+            {
+                q: "Wo findet man Elytra im Überlebensmodus?",
+                options: ["In Nether Fortresses", "In Ocean Monuments", "In End Ships", "In Ancient Cities"],
+                correct: 2,
+                cat: "Exploration"
+            },
+            {
+                q: "Welcher Block verlangsamt die Bewegung von Spielern am meisten?",
+                options: ["Soul Sand", "Cobblestone", "Sand", "Gravel"],
+                correct: 0,
+                cat: "Blocks"
+            },
+            {
+                q: "Was benötigt man, um ein Horse zu reiten und zu steuern?",
+                options: ["Lead + Carrot", "Saddle", "Saddle + Carrot on a Stick", "Horse Armor"],
+                correct: 1,
+                cat: "Animals"
+            },
+            {
+                q: "Welches Item droppt eine Witch am seltensten beim Tod?",
+                options: ["Glass Bottle", "Redstone", "Potions", "Nether Star"],
+                correct: 2,
+                cat: "Drops"
+            },
+            {
+                q: "Welche Zutat wird benötigt, um einen Redstone Repeater zu craften?",
+                options: ["3 Smooth Stone + 2 Redstone Torches + 1 Redstone Dust", "3 Cobblestone + 2 Torches + 1 Iron", "3 Wood + 2 Redstone", "2 Quartz + 3 Stone"],
+                correct: 0,
+                cat: "Redstone"
+            },
+            {
+                q: "Wie heißt der Erfinder & ursprüngliche Chefentwickler von Minecraft?",
+                options: ["Jens 'Jeb' Bergensten", "Markus 'Notch' Persson", "Daniel Rosenfeld", "Dinnerbone"],
+                correct: 1,
+                cat: "History"
+            },
+            {
+                q: "In welchem Jahr wurde die Vollversion Minecraft 1.0 offiziell veröffentlicht?",
+                options: ["2009", "2011", "2013", "2015"],
+                correct: 1,
+                cat: "History"
+            },
+            {
+                q: "Wie heißt der Standard-Skin in Minecraft?",
+                options: ["Alex", "Steve", "John", "Crafty"],
+                correct: 1,
+                cat: "General"
+            },
+            {
+                q: "Welcher Fisch fügt dem Spieler beim Verzehr Poison zu?",
+                options: ["Raw Cod", "Raw Salmon", "Pufferfish", "Tropical Fish"],
+                correct: 2,
+                cat: "Food"
+            },
+            {
+                q: "Welches Log hat eine weiße Rinde mit schwarzen Streifen?",
+                options: ["Oak Log", "Birch Log", "Jungle Log", "Dark Oak Log"],
+                correct: 1,
+                cat: "Blocks"
+            },
+            {
+                q: "Wie viele XP Punkte bringt das Besiegen des Ender Dragons?",
+                options: ["ca. 1.000 XP", "ca. 5.000 XP", "ca. 12.000 XP", "ca. 50.000 XP"],
+                correct: 2,
+                cat: "Experience"
+            },
+            {
+                q: "Welches Item droppt der Wither nach seinem Tod?",
+                options: ["Wither Heart", "Nether Star", "Dragon Egg", "End Crystal"],
+                correct: 1,
+                cat: "Boss"
+            },
+            {
+                q: "Welche Blöcke werden für das Rezept eines Beacons verwendet?",
+                options: ["Nether Star + 5 Glass + 3 Obsidian", "Netherite + 8 Diamonds", "Emerald Block + 4 Iron", "Dragon Egg + 8 Glass"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Wie viele Items passen in einen gewöhnlichen Full Stack?",
+                options: ["16", "32", "64", "99"],
+                correct: 2,
+                cat: "Mechanics"
+            },
+            {
+                q: "Vor welchem Tier laufen Creeper panisch weg?",
+                options: ["Wolf", "Cat", "Bear", "Sheep"],
+                correct: 1,
+                cat: "Mobs"
+            },
+            {
+                q: "Vor welchem Tier fürchten sich Phantoms?",
+                options: ["Dog", "Cat", "Villager", "Iron Golem"],
+                correct: 1,
+                cat: "Mobs"
+            },
+            {
+                q: "Welcher Mob flieht vor dem Wolf?",
+                options: ["Creeper", "Skeleton", "Zombie", "Enderman"],
+                correct: 1,
+                cat: "Mobs"
+            },
+            {
+                q: "Aus wie vielen Iron Ingots baut man ein Minecart?",
+                options: ["4", "5", "6", "8"],
+                correct: 1,
+                cat: "Crafting"
+            },
+            {
+                q: "Aus wie vielen Wool und Planks baut man ein Bed?",
+                options: ["3 Wool + 3 Wooden Planks", "2 Wool + 2 Planks", "4 Wool + 2 Sticks", "3 Wool + 2 Iron"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Welches Item ist die offizielle Währung beim Trading mit Villagern?",
+                options: ["Diamond", "Gold Ingot", "Emerald", "La peace Lazuli"],
+                correct: 2,
+                cat: "Villager"
+            },
+            {
+                q: "Welcher Job Site Block weist einem Villager den Beruf 'Librarian' zu?",
+                options: ["Lectern", "Crafting Table", "Brewing Stand", "Grindstone"],
+                correct: 0,
+                cat: "Villager"
+            },
+            {
+                q: "Welcher Job Site Block macht einen Villager zum 'Cleric'?",
+                options: ["Cauldron", "Brewing Stand", "Smoker", "Loom"],
+                correct: 1,
+                cat: "Villager"
+            },
+            {
+                q: "Welcher Effekt verlangsamt das Abbauen von Blöcken im Ocean Monument?",
+                options: ["Blindness", "Mining Fatigue", "Nausea", "Weakness"],
+                correct: 1,
+                cat: "Effects"
+            },
+            {
+                q: "Welches Item droppt der Elder Guardian garantiert?",
+                options: ["Wet Sponge", "Trident", "Heart of the Sea", "Prismarine Crystal"],
+                correct: 0,
+                cat: "Ocean"
+            },
+            {
+                q: "Wie kann man einen Wet Sponge wieder trocknen?",
+                options: ["Im Furnace schmelzen oder im Nether platzieren", "In der Sonne platzieren", "Mit Redstone aktivieren", "Neben Sand setzen"],
+                correct: 0,
+                cat: "Mechanics"
+            },
+            {
+                q: "Welche Waffe wird gelegentlich von Drowned getragen?",
+                options: ["Crossbow", "Trident", "Netherite Sword", "Spear"],
+                correct: 1,
+                cat: "Weapons"
+            },
+            {
+                q: "Welche Enchantment erzeugt bei Gewitter Blitze beim geworfenen Trident?",
+                options: ["Loyalty", "Channeling", "Riptide", "Impaling"],
+                correct: 1,
+                cat: "Enchantments"
+            },
+            {
+                q: "Welche Enchantment lässt den Trident zum Spieler zurückkehren?",
+                options: ["Loyalty", "Unbreaking", "Mending", "Riptide"],
+                correct: 0,
+                cat: "Enchantments"
+            },
+            {
+                q: "Welcher Redstone-Block sendet ein Signal, wenn sich der Block davor verändert?",
+                options: ["Redstone Repeater", "Observer", "Redstone Comparator", "Dispenser"],
+                correct: 1,
+                cat: "Redstone"
+            },
+            {
+                q: "Woraus craftet man ein Book?",
+                options: ["3 Paper + 1 Leather", "4 Paper + 1 String", "3 Paper + 1 Ink Sac", "2 Paper + 2 Leather"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Wie viele Scute benötigt man zur Herstellung einer Turtle Shell?",
+                options: ["3", "5", "8", "4"],
+                correct: 1,
+                cat: "Crafting"
+            },
+            {
+                q: "Womit vermehrt man Axolotls?",
+                options: ["Bucket of Tropical Fish", "Seagrass", "Raw Cod", "Slimeball"],
+                correct: 0,
+                cat: "Animals"
+            },
+            {
+                q: "Welcher Mob greift an, wenn der Spieler mehrere Tage lang nicht in einem Bed geschlafen hat?",
+                options: ["Wither", "Phantom", "Drowned", "Vex"],
+                correct: 1,
+                cat: "Mobs"
+            },
+            {
+                q: "Welches Item benötigt man, um einen Strider im Nether zu reiten?",
+                options: ["Saddle + Warped Fungus on a Stick", "Saddle + Carrot on a Stick", "Lead + Nether Wart", "Saddle + Apple"],
+                correct: 0,
+                cat: "Nether"
+            },
+            {
+                q: "Welches Item hebt sofort alle aktiven Status-Effekte auf?",
+                options: ["Potion of Healing", "Milk Bucket", "Potion of Purity", "Honey Bottle"],
+                correct: 1,
+                cat: "Potions"
+            },
+            {
+                q: "Wie craftet man einen Anvil?",
+                options: ["3 Blocks of Iron + 4 Iron Ingots", "4 Blocks of Iron + 3 Iron Ingots", "9 Iron Ingots", "5 Blocks of Iron + 2 Sticks"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Wie viele Wither Skeleton Skulls braucht man, um den Wither zu bauen?",
+                options: ["2", "3", "4", "1"],
+                correct: 1,
+                cat: "Boss"
+            },
+            {
+                q: "Welcher Block wird neben Skulls zum Beschwören des Withers benötigt?",
+                options: ["4 Soul Sand oder Soul Soil", "4 Obsidian", "4 Netherrack", "4 Iron Blocks"],
+                correct: 0,
+                cat: "Boss"
+            },
+            {
+                q: "Welcher Ton erklingt, wenn ein Note Block auf Planks steht?",
+                options: ["Bass Guitar", "Acoustic Guitar", "Piano", "Bell"],
+                correct: 1,
+                cat: "Redstone"
+            },
+            {
+                q: "Welches Ore liefert Lapis Lazuli Edelsteine?",
+                options: ["Lapis Lazuli Ore", "Gold Ore", "Redstone Ore", "Diamond Ore"],
+                correct: 0,
+                cat: "Ores"
+            },
+            {
+                q: "Welche Farbe haben die Partikel der Ender Pearl?",
+                options: ["Blau", "Purple / Violett", "Grün", "Gelb"],
+                correct: 1,
+                cat: "Visuals"
+            },
+            {
+                q: "Was benötigt man, um Wool einzufärben?",
+                options: ["Dye (Farbstoff)", "Potion", "Enchanting Table", "Cauldron"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Wie erhält man Gunpowder im Survival Mode?",
+                options: ["Als Drop von Creeper / Witch / Ghast", "Crafting aus Coal + Sulfur", "Crafting aus Redstone + Sand", "Drop von Enderman"],
+                correct: 0,
+                cat: "Mechanics"
+            },
+            {
+                q: "Welcher Mob droppt Slimeballs?",
+                options: ["Magma Cube", "Slime", "Pufferfish", "Frog"],
+                correct: 1,
+                cat: "Mobs"
+            },
+            {
+                q: "Welcher Frosch erzeugt ein verdantes (grünes) Froglight?",
+                options: ["Cold Frog (Grün)", "Warm Frog", "Temperate Frog", "Swamp Frog"],
+                correct: 0,
+                cat: "Mobs"
+            },
+            {
+                q: "Welches Holz stammt aus den Mangrove Swamps?",
+                options: ["Mangrove Wood", "Acacia Wood", "Jungle Wood", "Dark Oak Wood"],
+                correct: 0,
+                cat: "Blocks"
+            },
+            {
+                q: "Welches Item erlaubt das Setzen eines Respawn Points im Nether?",
+                options: ["Bed (explodiert)", "Respawn Anchor", "Ender Chest", "Beacon"],
+                correct: 1,
+                cat: "Nether"
+            },
+            {
+                q: "Womit lädt man einen Respawn Anchor auf?",
+                options: ["Glowstone Blocks", "Redstone Dust", "Lapis Lazuli", "Soul Lantern"],
+                correct: 0,
+                cat: "Nether"
+            },
+            {
+                q: "Was passiert, wenn man versucht im Nether in einem Bed zu schlafen?",
+                options: ["Man schläft friedlich", "Das Bed explodiert mit enormer Kraft", "Nichts passiert", "Man wacht im End auf"],
+                correct: 1,
+                cat: "Nether"
+            },
+            {
+                q: "Welches Mineral findet man im Badlands / Mesa Biom besonders häufig nahe der Oberfläche?",
+                options: ["Gold Ore", "Diamond Ore", "Emerald Ore", "Coal Ore"],
+                correct: 0,
+                cat: "Biomes"
+            },
+            {
+                q: "Wie craftet man eine Candle?",
+                options: ["1 String + 1 Honeycomb", "1 String + 1 Tallow", "1 Stick + 1 Coal", "1 Wax + 1 Paper"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Wie gewinnt man Honeycomb von einer Beehive?",
+                options: ["Mit Shears benutzen", "Mit Glass Bottle benutzen", "Mit Axe abbauen", "Mit der Hand schlagen"],
+                correct: 0,
+                cat: "Animals"
+            },
+            {
+                q: "Welches Tier kann Items im Maul tragen?",
+                options: ["Fox", "Wolf", "Cat", "Parrot"],
+                correct: 0,
+                cat: "Animals"
+            },
+            {
+                q: "Welcher Vogel setzt sich auf die Schulter des Spielers?",
+                options: ["Parrot", "Owl", "Falcon", "Bat"],
+                correct: 0,
+                cat: "Animals"
+            },
+            {
+                q: "Was passiert, wenn man einen Parrot mit einem Cookie füttert?",
+                options: ["Er vergrößert sich", "Er stirbt an Vergiftung (Poison)", "Er lernt sprechen", "Er fliegt weg"],
+                correct: 1,
+                cat: "Animals"
+            },
+            {
+                q: "Welcher Block erlaubt das Reparieren und Umbenennen von Items mit XP?",
+                options: ["Anvil", "Crafting Table", "Grindstone", "Smithing Table"],
+                correct: 0,
+                cat: "Tools"
+            },
+            {
+                q: "Welche maximale Stufe hat die Enchantment 'Sharpness' gewöhnlich?",
+                options: ["Level III", "Level IV", "Level V", "Level X"],
+                correct: 2,
+                cat: "Enchantments"
+            },
+            {
+                q: "Welche Enchantment sorgt dafür, dass ein Item beim Tod unwiederbringlich gelöscht wird?",
+                options: ["Curse of Vanishing", "Curse of Binding", "Unbreaking", "Silk Touch"],
+                correct: 0,
+                cat: "Enchantments"
+            },
+            {
+                q: "Welches Werkzeug baut Snow & Sand am schnellsten ab?",
+                options: ["Axe", "Shovel", "Pickaxe", "Hoe"],
+                correct: 1,
+                cat: "Tools"
+            },
+            {
+                q: "Welcher Mob droppt Ink Sacs?",
+                options: ["Squid", "Glow Squid", "Drowned", "Guardian"],
+                correct: 0,
+                cat: "Drops"
+            },
+            {
+                q: "Welcher Gegenstand hält im Furnace am längsten als Brennstoff?",
+                options: ["Coal", "Charcoal", "Lava Bucket (100 Items)", "Dried Kelp Block"],
+                correct: 2,
+                cat: "Furnace"
+            },
+            {
+                q: "Wie viele Gegenstände schmilzt ein einziger Lava Bucket im Furnace?",
+                options: ["50 Items", "80 Items", "100 Items", "200 Items"],
+                correct: 2,
+                cat: "Furnace"
+            },
+            {
+                q: "Wie groß ist die minecraft welt",
+                options: ["100m", "55m", "30m", "33m"],
+                correct: 3,
+                cat: "Welt"
+            },
+            {
+                q: "Welcher Mob verleiht dem Spieler den Status-Effekt 'Levitation'?",
+                options: ["Shulker", "Enderman", "Phantom", "Vex"],
+                correct: 0,
+                cat: "End"
+            },
+            {
+                q: "Wo findet man Shulker im Überlebensmodus?",
+                options: ["In End Cities", "Im Nether", "In Ancient Cities", "In Dungeons"],
+                correct: 0,
+                cat: "End"
+            },
+            {
+                q: "Woraus craftet man eine Shulker Box?",
+                options: ["2 Shulker Shells + 1 Chest", "4 Shulker Shells + 1 Iron", "1 Shulker Shell + 2 Chests", "2 Shulker Shells + 1 Ender Pearl"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Was ist das Besondere an einer Shulker Box?",
+                options: ["Sie behält ihre Items beim Abbauen im Inventar", "Sie verdoppelt Items", "Sie ist unzerstörbar", "Sie schwimmt auf Lava"],
+                correct: 0,
+                cat: "Mechanics"
+            },
+            {
+                q: "Welche Blume ergibt Red Dye?",
+                options: ["Poppy / Rose", "Dandelion", "Cornflower", "Blue Orchid"],
+                correct: 0,
+                cat: "Crafting"
+            },
+            {
+                q: "Welcher Block spendet Licht und muss durch Redstone aktiviert werden?",
+                options: ["Redstone Lamp", "Soul Lantern", "Glowstone", "Jack o'Lantern"],
+                correct: 0,
+                cat: "Redstone"
+            },
+            {
+                q: "Welcher Mob spawnt ausschließlich im Deep Dark Biom (Ancient City)?",
+                options: ["Warden", "Wither", "Ender Dragon", "Elder Guardian"],
+                correct: 0,
+                cat: "Mobs"
+            },
+            {
+                q: "Welcher Block im Deep Dark reagiert auf Vibrationen und Geräusche?",
+                options: ["Sculk Sensor", "Soul Sand", "Redstone Ore", "Observer"],
+                correct: 0,
+                cat: "Blocks"
+            },
+            {
+                q: "Welche Enchantment erlaubt es, Ice oder Glass Blöcke direkt abzubauen?",
+                options: ["Silk Touch", "Looting", "Fortune", "Efficiency"],
+                correct: 0,
+                cat: "Enchantments"
+            },
+            {
+                q: "Welcher Mob gewann die Mob Vote 2020 und erschien in Update 1.17?",
+                options: ["Glow Squid", "Iceologer", "Moobloom", "Rascal"],
+                correct: 0,
+                cat: "Updates"
+            }
+        ];
+
+        let selectedQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timerInterval = null;
+        let timeLeft = 15;
+        let userAnswers = [];
+        let targetQuestionCount = 100;
+        let activeFilter = 'all';
+
+        // EINZIGE ZEILE FÜR DIE AUDIO-URL IM CODE:
+        const AUDIO_URL = "https://nu.vgmtreasurechest.com/soundtracks/mc-championship-season-2-original-game-soundtrack/onyeyecy/21.%20Overtime.mp3";
+
+        const audioPlayer = document.getElementById('quizAudio');
+
+        function playAudioFromStart() {
+            if (!AUDIO_URL) return;
+            audioPlayer.src = AUDIO_URL;
+            audioPlayer.currentTime = 0;
+
+            let playPromise = audioPlayer.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Audio Autoplay unterbunden:", error);
+                });
+            }
+        }
+
+        function selectQuestionCount(count) {
+            targetQuestionCount = count;
+            document.querySelectorAll('.count-btn').forEach(btn => {
+                if (parseInt(btn.getAttribute('data-count')) === count) {
+                    btn.className = "count-btn py-2 px-3 rounded-lg border text-xs sm:text-sm font-semibold transition bg-mc-emerald/20 border-mc-emerald text-mc-emerald font-bold";
+                } else {
+                    btn.className = "count-btn py-2 px-3 rounded-lg border text-xs sm:text-sm font-semibold transition bg-slate-700 border-slate-600 text-slate-200 hover:border-mc-emerald";
+                }
+            });
+        }
+
+        function startQuiz() {
+            let shuffled = [...ALL_QUESTIONS].sort(() => 0.5 - Math.random());
+            selectedQuestions = shuffled.slice(0, Math.min(targetQuestionCount, ALL_QUESTIONS.length));
+
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            timeLeft = 15;
+            
+            const currentQ = selectedQuestions[currentQuestionIndex];
+
+            document.getElementById('questionCounter').innerText = `Frage ${currentQuestionIndex + 1} / ${selectedQuestions.length}`;
+            document.getElementById('categoryBadge').innerText = currentQ.cat || "Minecraft";
+            document.getElementById('liveScore').innerText = score;
+            document.getElementById('questionText').innerText = currentQ.q;
+
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.disabled = true;
+            nextBtn.className = "mc-btn px-6 py-2.5 bg-slate-700 opacity-50 cursor-not-allowed text-white rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 border border-slate-600 transition";
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const prefixes = ['A', 'B', 'C', 'D'];
+            currentQ.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn mc-btn w-full p-4 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-left font-medium text-sm sm:text-base text-slate-200 transition flex items-center gap-3";
+                btn.onclick = () => selectOption(idx);
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center font-bold text-xs text-mc-emerald shrink-0">${prefixes[idx]}</span>
+                    <span class="flex-grow">${opt}</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+
+            playAudioFromStart();
+
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerText = document.getElementById('timerText');
+            timerText.innerText = `${String(timeLeft).padStart(2, '0')}s`;
+
+            const timerBar = document.getElementById('timerBar');
+            const percentage = Math.max(0, (timeLeft / 15) * 100);
+            timerBar.style.width = `${percentage}%`;
+
+            if (timeLeft > 8) {
+                timerBar.className = "timer-bar h-full bg-mc-emerald rounded-full";
+                timerText.className = "text-white";
+            } else if (timeLeft > 3) {
+                timerBar.className = "timer-bar h-full bg-mc-gold rounded-full";
+                timerText.className = "text-mc-gold font-bold";
+            } else {
+                timerBar.className = "timer-bar h-full bg-mc-redstone rounded-full";
+                timerText.className = "text-mc-redstone font-bold animate-pulse";
+            }
+        }
+
+        function selectOption(selectedIdx) {
+            clearInterval(timerInterval);
+            
+            // HIER WIRD DER SOUND PAUSIERT, SOBALD EINE ANTWORT GEWÄHLT WURDE
+            audioPlayer.pause();
+
+            const currentQ = selectedQuestions[currentQuestionIndex];
+            const isCorrect = (selectedIdx === currentQ.correct);
+
+            if (isCorrect) {
+                score++;
+                document.getElementById('liveScore').innerText = score;
+            }
+
+            userAnswers.push({
+                question: currentQ.q,
+                options: currentQ.options,
+                userChoice: selectedIdx,
+                correctChoice: currentQ.correct,
+                status: isCorrect ? 'correct' : 'wrong',
+                category: currentQ.cat
+            });
+
+            highlightAnswers(selectedIdx, currentQ.correct);
+            enableNextButton();
+        }
+
+        function handleTimeout() {
+            clearInterval(timerInterval);
+
+            // HIER WIRD DER SOUND PAUSIERT, WENN DIE ZEIT ABGELAUFEN IST
+            audioPlayer.pause();
+
+            const currentQ = selectedQuestions[currentQuestionIndex];
+            
+            userAnswers.push({
+                question: currentQ.q,
+                options: currentQ.options,
+                userChoice: -1,
+                correctChoice: currentQ.correct,
+                status: 'timeout',
+                category: currentQ.cat
+            });
+
+            finishQuiz();
+        }
+
+        function highlightAnswers(userChoice, correctChoice) {
+            const buttons = document.querySelectorAll('#optionsContainer .option-btn');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-slate-700/90');
+
+                if (idx === correctChoice) {
+                    btn.className = "option-btn mc-btn w-full p-4 rounded-xl bg-green-900/40 border-2 border-green-500 text-left font-semibold text-sm sm:text-base text-green-200 flex items-center gap-3";
+                } else if (idx === userChoice) {
+                    btn.className = "option-btn mc-btn w-full p-4 rounded-xl bg-red-900/40 border-2 border-red-500 text-left font-semibold text-sm sm:text-base text-red-200 flex items-center gap-3";
+                } else {
+                    btn.className = "option-btn mc-btn w-full p-4 rounded-xl bg-slate-900/50 opacity-40 border border-slate-800 text-left text-sm text-slate-400 flex items-center gap-3";
+                }
+            });
+        }
+
+        function enableNextButton() {
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.disabled = false;
+            nextBtn.className = "mc-btn px-6 py-2.5 bg-mc-grass hover:bg-green-600 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 border border-green-400 shadow-lg transition transform hover:scale-105";
+        }
+
+        function manualNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < selectedQuestions.length) {
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            audioPlayer.pause();
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+
+            const total = selectedQuestions.length;
+            const percent = total > 0 ? Math.round((score / total) * 100) : 0;
+            
+            let correctCount = userAnswers.filter(a => a.status === 'correct').length;
+            let wrongOrTimeoutCount = userAnswers.length - correctCount;
+
+            document.getElementById('finalScore').innerText = `${score} / ${total}`;
+            document.getElementById('finalPercent').innerText = `${percent}%`;
+            document.getElementById('finalCorrect').innerText = correctCount;
+            document.getElementById('finalWrong').innerText = wrongOrTimeoutCount;
+
+            let rank = "Höhlen-Neuling";
+            let iconClass = "fa-solid fa-seedling text-green-400";
+            if (percent >= 90) {
+                rank = "👑 Minecraft Legend";
+                iconClass = "fa-solid fa-crown text-yellow-400";
+            } else if (percent >= 75) {
+                rank = "⚡ Redstone Master";
+                iconClass = "fa-solid fa-bolt text-mc-emerald";
+            } else if (percent >= 50) {
+                rank = "🛡️ Experienced Adventurer";
+                iconClass = "fa-solid fa-shield-halved text-blue-400";
+            } else if (percent >= 25) {
+                rank = "⛏️ Survivalist";
+                iconClass = "fa-solid fa-pickaxe text-amber-500";
+            }
+            
+            document.getElementById('resultRankTitle').innerText = rank;
+            document.getElementById('resultBadgeIcon').innerHTML = `<i class="${iconClass}"></i>`;
+
+            renderResultsList();
+        }
+
+        function renderResultsList() {
+            const container = document.getElementById('resultsList');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const searchInput = document.getElementById('reviewSearchInput');
+            const searchTerm = searchInput ? (searchInput.value || '').toLowerCase() : '';
+
+            userAnswers.forEach((ans, idx) => {
+                if (activeFilter !== 'all' && ans.status !== activeFilter) {
+                    return;
+                }
+
+                if (searchTerm && !ans.question.toLowerCase().includes(searchTerm)) {
+                    return;
+                }
+
+                const card = document.createElement('div');
+                let borderClass = "border-slate-800 bg-slate-900/80";
+                let badgeHTML = "";
+
+                if (ans.status === 'correct') {
+                    borderClass = "border-green-500/40 bg-green-950/20";
+                    badgeHTML = `<span class="px-2.5 py-1 rounded-lg bg-green-500/10 text-green-400 border border-green-500/30 text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-check"></i> Richtig</span>`;
+                } else if (ans.status === 'wrong') {
+                    borderClass = "border-red-500/40 bg-red-950/20";
+                    badgeHTML = `<span class="px-2.5 py-1 rounded-lg bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-xmark"></i> Falsch</span>`;
+                } else {
+                    borderClass = "border-amber-500/40 bg-amber-950/20";
+                    badgeHTML = `<span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> Zeit Abgelaufen</span>`;
+                }
+
+                const userText = ans.userChoice >= 0 ? ans.options[ans.userChoice] : "Keine Antwort (Zeit abgelaufen)";
+                const correctText = ans.options[ans.correctChoice];
+
+                card.className = `p-4 rounded-xl border ${borderClass} transition`;
+                card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                        <span class="text-xs font-mono text-slate-400">Aufgabe #${idx + 1} • <span class="text-mc-emerald font-sans">${ans.category || 'General'}</span></span>
+                        ${badgeHTML}
+                    </div>
+                    <h4 class="font-bold text-slate-100 text-sm sm:text-base mb-3">${ans.question}</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                            <span class="block text-slate-400 text-[10px] uppercase tracking-wider font-bold mb-0.5">Deine Antwort:</span>
+                            <span class="${ans.status === 'correct' ? 'text-green-400 font-semibold' : 'text-red-300'}">${userText}</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                            <span class="block text-slate-400 text-[10px] uppercase tracking-wider font-bold mb-0.5">Richtige Antwort:</span>
+                            <span class="text-mc-emerald font-semibold">${correctText}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            if (container.children.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Keine Aufgaben für diese Filterkriterien gefunden.</div>`;
+            }
+        }
+
+        function filterResults(filterType) {
+            activeFilter = filterType;
+            ['All', 'Correct', 'Wrong', 'Timeout'].forEach(type => {
+                const btn = document.getElementById(`filterBtn${type}`);
+                if (type.toLowerCase() === filterType) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700 text-white transition";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
+                }
+            });
+            renderResultsList();
+        }
+
+        function searchReviewQuestions() {
+            renderResultsList();
+        }
+
+        function resetAndRestart() {
+            clearInterval(timerInterval);
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkBirthday();
+        });
+
+        function checkBirthday() {
+            const today = new Date();
+            // Monat 8 ist September (0 = Januar, 8 = September)
+            const isPepeBday = (today.getDate() === 1 && today.getMonth() === 9 && today.getFullYear() === 2026);
+
+            if (isPepeBday) {
+                document.querySelectorAll('.bday-element').forEach(el => el.classList.remove('hidden'));
+                initConfetti();
+            } else {
+                document.querySelectorAll('.bday-element').forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        function initConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const confettiParticles = [];
+            const colors = ['#55ff55', '#fca800', '#4bede6', '#ff2200', '#ffffff', '#ff77a9'];
+            for (let i = 0; i < 120; i++) {
+                confettiParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * 10 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 10,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.03,
+                    tiltAngle: 0
+                });
+            }
+
+            function drawConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confettiParticles.forEach((p) => {
+                    ctx.beginPath();
+                    ctx.lineWidth = p.r;
+                    ctx.strokeStyle = p.color;
+                    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                    ctx.stroke();
+                });
+
+                updateConfetti();
+                requestAnimationFrame(drawConfetti);
+            }
+
+            function updateConfetti() {
+                confettiParticles.forEach((p) => {
+                    p.tiltAngle += p.tiltAngleIncremental;
+                    p.y += (Math.cos(p.d) + 1 + p.r / 2) / 2;
+                    p.x += Math.sin(p.tiltAngle) * 2;
+                    p.tilt = Math.sin(p.tiltAngle) * 15;
+
+                    if (p.y > canvas.height) {
+                        p.x = Math.random() * canvas.width;
+                        p.y = -20;
+                        p.tilt = Math.random() * 10 - 10;
+                    }
+                });
+            }
+
+            drawConfetti();
+        }
+    </script>
+</body>
+</html>
